@@ -12,6 +12,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class ProcessReceivedMessageRealInit implements ShouldQueue
@@ -77,49 +78,68 @@ class ProcessReceivedMessageRealInit implements ShouldQueue
         $nombres = $dniData->nombres;
         $apellidoPaterno = $dniData->apellido_paterno;
         $apellidoMaterno = $dniData->apellido_materno;
-    
+
         // Construir el mensaje personalizado
         $message = "¡Hola $nombres $apellidoPaterno $apellidoMaterno! 🌟\n";
         $message .= "🎉 ¡Bienvenido/a a nuestro servicio! Estamos aquí para ayudarte. 😊\n\n";
         $message .= "¿En qué podemos asistirte hoy? 🤔\n";
         $message .= "Por favor, escribe tu consulta o pregunta. ❓";
-    
+
+        // Actualizar el usuario autenticado
+        $this->updateAuthenticatedUser($nombres, $apellidoPaterno, $apellidoMaterno);
+
         return $message;
     }
+
+    protected function updateAuthenticatedUser($nombres, $apellidoPaterno, $apellidoMaterno)
+    {
+        // Obtener el usuario autenticado
+        $user = Auth::user();
     
+        if ($user instanceof \App\Models\User) {
+            // Actualizar el usuario con los nuevos datos
+            $user->name = $nombres;
+            $user->last_name = "$apellidoPaterno $apellidoMaterno";
+            $user->email = $nombres . '@crmdrasam.com'; // Actualizar el email con el nombre
+            $user->save();
+        } else {
+            Log::error("No se encontró un usuario autenticado o el usuario no es una instancia de App\Models\User.");
+        }
+    }
+
 
 
     protected function  getDniData($dni)
     {
         // Crear el JSON con el número de DNI
         $params = json_encode(['dni' => $dni]);
-    
+
         // Iniciar la solicitud cURL
         $curl = curl_init();
-    
+
         // Configurar las opciones de la solicitud cURL
         curl_setopt_array($curl, [
             CURLOPT_URL => "https://apiperu.dev/api/dni",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CUSTOMREQUEST => "POST",
             CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_POSTFIELDS => $params,        
+            CURLOPT_POSTFIELDS => $params,
             CURLOPT_HTTPHEADER => [
                 'Accept: application/json',
                 'Content-Type: application/json',
                 'Authorization: Bearer 8a62e261f044c12978c1dac7b2d4ad9a6b8ed19889009e176e39f45ab50a2a2c' // Reemplaza INGRESAR_TOKEN_AQUI con tu token de autorización
             ],
         ]);
-    
+
         // Ejecutar la solicitud cURL
         $response = curl_exec($curl);
-    
+
         // Obtener el posible error de la solicitud cURL
         $err = curl_error($curl);
-    
+
         // Cerrar la solicitud cURL
         curl_close($curl);
-    
+
         // Verificar si hubo algún error durante la solicitud
         if ($err) {
             // Si hubo un error, retornar el mensaje de error
@@ -129,5 +149,4 @@ class ProcessReceivedMessageRealInit implements ShouldQueue
             return response()->json(json_decode($response), 200);
         }
     }
-
 }

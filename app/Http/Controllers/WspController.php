@@ -462,7 +462,54 @@ class WspController extends Controller
         return $mensaje;
     }
 
-
+    public function struct_messages_list_satisfaction_customers($text, $num)
+    {
+        $mensaje = [
+            "messaging_product" => "whatsapp",
+            "recipient_type" => "individual",
+            "to" => $num,
+            "type" => "interactive",
+            "interactive" => [
+                "type" => "list",
+                "body" => [
+                    "text" => $text
+                ],
+                "action" => [
+                    "button" => "Calificaciones",
+                    "sections" => [
+                        [
+                            "title" => "Encuesta de Satisfacción",
+                            "rows" => [
+                                [
+                                    "id" => "rating_1",
+                                    "title" => "Muy malo 😠",
+                                ],
+                                [
+                                    "id" => "rating_2",
+                                    "title" => "Malo 😞",
+                                ],
+                                [
+                                    "id" => "rating_3",
+                                    "title" => "Regular 😐",
+                                ],
+                                [
+                                    "id" => "rating_4",
+                                    "title" => "Bueno 🙂",
+                                ],
+                                [
+                                    "id" => "rating_5",
+                                    "title" => "Muy bueno 😃",
+                                ],
+                            ]
+                        ],
+                    ]
+                ]
+            ]
+        ];
+    
+        return $mensaje;
+    }
+    
 
     public function struct_messages_list_dtrtycr($optionsMessage, $contactNumber)
     {
@@ -996,53 +1043,24 @@ class WspController extends Controller
     }
 
 
-    public function struct_messages_list_satisfaction_customers($text, $num)
+    public function sendMessageFiles($contentMessage, $textCaption, $phoneNumber)
     {
+        // Estructura del mensaje para enviar un archivo (imagen) en WhatsApp
         $mensaje = [
             "messaging_product" => "whatsapp",
             "recipient_type" => "individual",
-            "to" => $num,
-            "type" => "interactive",
-            "interactive" => [
-                "type" => "list",
-                "body" => [
-                    "text" => $text
-                ],
-                "action" => [
-                    "button" => "Calificaciones",
-                    "sections" => [
-                        [
-                            "title" => "Encuesta de Satisfacción",
-                            "rows" => [
-                                [
-                                    "id" => "rating_1",
-                                    "title" => "Muy malo 😠",
-                                ],
-                                [
-                                    "id" => "rating_2",
-                                    "title" => "Malo 😞",
-                                ],
-                                [
-                                    "id" => "rating_3",
-                                    "title" => "Regular 😐",
-                                ],
-                                [
-                                    "id" => "rating_4",
-                                    "title" => "Bueno 🙂",
-                                ],
-                                [
-                                    "id" => "rating_5",
-                                    "title" => "Muy bueno 😃",
-                                ],
-                            ]
-                        ],
-                    ]
-                ]
+            "to" => $phoneNumber,
+            "type" => "image",
+            "image" => [
+                "caption" => $textCaption,
+                "link" => $contentMessage
             ]
         ];
-
+    
+        // Retornar el mensaje estructurado
         return $mensaje;
     }
+    
 
 
     //Envio de documentos pdf

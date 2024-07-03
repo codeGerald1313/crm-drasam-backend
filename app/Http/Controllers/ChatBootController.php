@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\YourClass;
 use App\Jobs\ProcessReceivedMessageAdministrativeManagement;
 use App\Jobs\ProcessReceivedMessageDDCA;
 use App\Jobs\ProcessReceivedMessageDIA;
@@ -168,9 +169,15 @@ class ChatBootController extends Controller
 
         // Dispatch del job con los datos validados
         ProcessReceivedMessageLevelTwo::dispatch($validatedData);
+        // Obtener la información del evento usando el helper
+        $yourClass = new YourClass();
+        $eventInfo = $yourClass->getEventInfo();
 
         // Respuesta JSON indicando que la selección ha sido procesada correctamente
-        return response()->json(['message' => 'Selección procesada correctamente para Webhook.'], 200);
+        return response()->json([
+            'message' => 'Selección procesada correctamente para Webhook.',
+            'event_info' => $eventInfo
+        ], 200);
     }
 
     public function guardarSeleccionWebhookEncuesta(Request $request)
@@ -186,6 +193,7 @@ class ChatBootController extends Controller
 
         // Dispatch del job con los datos validados
         ProcessReceivedMessageSatisfaction::dispatch($validatedData);
+
 
         // Respuesta JSON indicando que la selección ha sido procesada correctamente
         return response()->json(['message' => 'Selección procesada correctamente para Webhook.'], 200);

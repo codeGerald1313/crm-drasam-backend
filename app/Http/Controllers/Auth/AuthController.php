@@ -199,19 +199,19 @@ class AuthController extends Controller
 
         // Permisos predeterminados para el rol
         $permissions = [
-            'users.list', 'users.create', 'users.edit', 'users.record', 'users.delete',
-            'contacts.list', 'contacts.create', 'contacts.edit', 'contacts.record', 'contacts.delete',
-            'type_document.list',
-            'role.list', 'role.create', 'role.edit', 'role.delete', 'role.destroy',
-            'permission.list', 'permission.give_permissions', 'permission.revoke_permissions',
-            'conexion.list', 'conexion.create', 'conexion.edit', 'conexion.delete', 'conexion.destroy',
-            'closure_reasons.list', 'closure_reasons.create', 'closure_reasons.update', 'closure_reasons.record', 'closure_reasons.delete',
-            'quickly_answers.list', 'quickly_answers.create', 'quickly_answers.delete',
-            'data.records', 'data.conversations', 'data.messages', 'data.asign', 'data.contact_create', 'data.asign_chat', 'data.close_conversation', 'data.reasing_conversation', 'data.reminder', 'data.add_tag',
-            'reports.list', 'reports.new_conversations', 'reports.monitor_activities', 'reports.team_performance', 'reports.filter_by',
-            'mass_messages.list', 'mass_messages.send_mass_messages', 'mass_messages.details_mass_messages',
-            'dashboard.list',
-            'users', 'contacts', 'type_document', 'roles', 'permissions', 'conexion', 'closure_reasons', 'quickly_answers', 'data', 'reports', 'massmessages', 'dashboard'
+            // 'users.list', 'users.create', 'users.edit', 'users.record', 'users.delete',
+            //'contacts.list', 'contacts.create', 'contacts.edit', 'contacts.record', 'contacts.delete',
+            //'type_document.list',
+            //'role.list', 'role.create', 'role.edit', 'role.delete', 'role.destroy',
+            //'permission.list', 'permission.give_permissions', 'permission.revoke_permissions',
+            //'conexion.list', 'conexion.create', 'conexion.edit', 'conexion.delete', 'conexion.destroy',
+            //'closure_reasons.list', 'closure_reasons.create', 'closure_reasons.update', 'closure_reasons.record', 'closure_reasons.delete',
+            //'quickly_answers.list', 'quickly_answers.create', 'quickly_answers.delete',
+            // 'data.records', 'data.conversations', 'data.messages', 'data.asign', 'data.contact_create', 'data.asign_chat', 'data.close_conversation', 'data.reasing_conversation', 'data.reminder', 'data.add_tag',
+            //'reports.list', 'reports.new_conversations', 'reports.monitor_activities', 'reports.team_performance', 'reports.filter_by',
+            //'mass_messages.list', 'mass_messages.send_mass_messages', 'mass_messages.details_mass_messages',
+            //'dashboard.list',
+            'data',
         ];
 
         // Asignar permisos al rol

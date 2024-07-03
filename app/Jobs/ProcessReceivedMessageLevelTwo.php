@@ -7,6 +7,7 @@ use App\Models\Conversation;
 use App\Models\Assignment;
 use Illuminate\Bus\Queueable;
 use App\Events\ConversationCreated;
+use App\Helpers\YourClass;
 use Illuminate\Queue\SerializesModels;
 use App\Http\Controllers\WspController;
 use Illuminate\Queue\InteractsWithQueue;
@@ -22,11 +23,13 @@ class ProcessReceivedMessageLevelTwo implements ShouldQueue
 
     protected $mensajeId;
     protected $opcionId;
+    protected $yourClass;
 
     public function __construct($data)
     {
         $this->mensajeId = $data['mensaje_id'];
         $this->opcionId = $data['opcion_id'];
+        $this->yourClass = new YourClass();
     }
 
     public function handle(): void
@@ -95,29 +98,29 @@ class ProcessReceivedMessageLevelTwo implements ShouldQueue
 
     protected function handleOficinaCatastro($user, $responseMessage, $messageContent)
     {
-        // ID de contacto específico para Oficina de Catastro
-        $contactId = 33; 
+        $contactId = 33;
+        $advisorId = 2; // Advisor para Oficina de Catastro
         $welcomeMessage = "🌟 ¡Bienvenido a la Oficina de Catastro de Drasam CRM! 🌟\n\nEn la Oficina de Catastro, estamos aquí para ti, nuestra comunidad. 🗺️ Antes de comenzar, necesitamos tu número de DNI para brindarte la mejor asistencia posible. 📋\n\n¡Por favor, compártelo con nosotros para ayudarte a resolver tus consultas rápidamente! 🙌";
-        $this->processAssignment($user, $contactId, $responseMessage, $messageContent, $welcomeMessage);
+        $this->processAssignment($user, $contactId, $advisorId, $responseMessage, $messageContent, $welcomeMessage);
     }
 
     protected function handleOficinaTitulacion($user, $responseMessage, $messageContent)
     {
-        // ID de contacto específico para Oficina de Titulación
         $contactId = 53;
+        $advisorId = 3; // Advisor para Oficina de Titulación
         $welcomeMessage = "🌟 ¡Bienvenido a la Oficina de Titulación de Drasam CRM! 🌟\n\nEn la Oficina de Titulación, estamos aquí para ti, nuestra comunidad. 📜 Antes de comenzar, necesitamos tu número de DNI para brindarte la mejor asistencia posible. 📋\n\n¡Por favor, compártelo con nosotros para ayudarte a resolver tus consultas rápidamente! 🙌";
-        $this->processAssignment($user, $contactId, $responseMessage, $messageContent, $welcomeMessage);
+        $this->processAssignment($user, $contactId, $advisorId, $responseMessage, $messageContent, $welcomeMessage);
     }
 
     protected function handleOficinaSaneamiento($user, $responseMessage, $messageContent)
     {
-        // ID de contacto específico para Oficina de Saneamiento
         $contactId = 66;
+        $advisorId = 4; // Advisor para Oficina de Saneamiento
         $welcomeMessage = "🌟 ¡Bienvenido a la Oficina de Saneamiento de Drasam CRM! 🌟\n\nEn la Oficina de Saneamiento, estamos aquí para ti, nuestra comunidad. 🌍 Antes de comenzar, necesitamos tu número de DNI para brindarte la mejor asistencia posible. 📋\n\n¡Por favor, compártelo con nosotros para ayudarte a resolver tus consultas rápidamente! 🙌";
-        $this->processAssignment($user, $contactId, $responseMessage, $messageContent, $welcomeMessage);
+        $this->processAssignment($user, $contactId, $advisorId, $responseMessage, $messageContent, $welcomeMessage);
     }
 
-    protected function processAssignment($user, $contactId, $responseMessage, $messageContent, $welcomeMessage)
+    protected function processAssignment($user, $contactId, $advisorId, $responseMessage, $messageContent, $welcomeMessage)
     {
         $contact = Contact::find($contactId);
         if (!$contact) {
@@ -125,7 +128,40 @@ class ProcessReceivedMessageLevelTwo implements ShouldQueue
             return;
         }
 
-        $conversation = Conversation::create([
+        // Crear primera conversación
+        $conversation1 = Conversation::create([
+            'contact_id' => $contactId,
+            'status' => 'open',
+            'status_bot' => 0,
+            'start_date' => now(),
+            'last_activity' => now()
+        ]);
+        
+        // Crear nueva asignación con el usuario autenticado
+        $userAssignment = Assignment::create([
+            'contact_id' => $contactId,
+            'conversation_id' => $conversation1->id,
+            'advisor_id' => $user->id,
+            'interes_en' => $this->opcionId
+        ]);
+        event(new ConversationCreated(new NewConversationResource($conversation1)));
+        $this->yourClass->storeEventInfo(new NewConversationResource($conversation1));
+
+        // Enviar mensaje estructurado predeterminado para la primera conversación
+        $wspController = new WspController();
+        $responseMessage1 = $wspController->struct_message($welcomeMessage, $contact->num_phone);
+
+        // Enviar el mensaje estructurado para la primera conversación
+        $messageResponse1 = $wspController->envia($responseMessage1);
+
+        // Guardar el mensaje de bienvenida utilizando $messageResponse1 para la primera conversación
+        $wspController->createMessageWelcome($conversation1, $messageResponse1, $responseMessage1, $user);
+
+        // Registrar en el log el contenido de $messageResponse1
+        Log::info('Contenido de messageResponse1:', ['response' => $messageResponse1]);
+
+        // Crear segunda conversación
+        $conversation2 = Conversation::create([
             'contact_id' => $contactId,
             'status' => 'open',
             'status_bot' => 0,
@@ -133,28 +169,26 @@ class ProcessReceivedMessageLevelTwo implements ShouldQueue
             'last_activity' => now()
         ]);
 
-        // Crear nueva asignación
-        $assignment = Assignment::create([
+        // Crear segunda asignación con advisor específico
+        $advisorAssignment = Assignment::create([
             'contact_id' => $contactId,
-            'conversation_id' => $conversation->id,
-            'advisor_id' => $user->id,
-            'interes_en' => $this->opcionId // Puedes ajustar esto según tus necesidades
+            'conversation_id' => $conversation2->id,
+            'advisor_id' => $advisorId,
+            'interes_en' => $this->opcionId
         ]);
+        event(new ConversationCreated(new NewConversationResource($conversation2)));
+        $this->yourClass->storeEventInfo(new NewConversationResource($conversation2));
 
-        // Enviar mensaje estructurado predeterminado
-        $wspController = new WspController();
-        $responseMessage = $wspController->struct_message($welcomeMessage, $contact->num_phone);
+        // Enviar mensaje estructurado predeterminado para la segunda conversación
+        $responseMessage2 = $wspController->struct_message($welcomeMessage, $contact->num_phone);
 
-        // Enviar el mensaje estructurado
-        $messageResponse = $wspController->envia($responseMessage);
+        // Enviar el mensaje estructurado para la segunda conversación
+        $messageResponse2 = $wspController->envia($responseMessage2);
 
-        // Guardar el mensaje de bienvenida utilizando $messageResponse
-        $wspController->createMessageWelcome($conversation, $messageResponse, $responseMessage, $user);
+        // Guardar el mensaje de bienvenida utilizando $messageResponse2 para la segunda conversación
+        $wspController->createMessageWelcome($conversation2, $messageResponse2, $responseMessage2, $user);
 
-        // Registrar en el log el contenido de $messageResponse
-        Log::info('Contenido de messageResponse:', ['response' => $messageResponse]);
-
-        // Disparar evento de conversación creada
-        event(new ConversationCreated(new NewConversationResource($conversation)));
+        // Registrar en el log el contenido de $messageResponse2
+        Log::info('Contenido de messageResponse2:', ['response' => $messageResponse2]);
     }
 }
