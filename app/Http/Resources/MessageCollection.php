@@ -14,10 +14,21 @@ class MessageCollection extends ResourceCollection
      */
     public function toArray(Request $request): array
     {
+        // Almacena los contenidos únicos para evitar duplicados
+        $uniqueContents = [];
 
-        return $this->collection->map(function ($row) {
-
+        return $this->collection->map(function ($row) use (&$uniqueContents) {
             $messageContent = json_decode($row->content, true);
+
+            // Verificar si el contenido ya ha sido procesado
+            $contentHash = md5(json_encode($messageContent));
+            if (in_array($contentHash, $uniqueContents)) {
+                // Si el contenido ya existe, omitir este mensaje
+                return null;
+            }
+
+            // Agregar el contenido al conjunto de contenidos únicos
+            $uniqueContents[] = $contentHash;
 
             if (in_array($row->type, ['image', 'audio', 'video', 'document']) && $row->emisor === 'Customer') {
                 $messageContent['link'] = optional($row->attachment)->url;
@@ -37,6 +48,6 @@ class MessageCollection extends ResourceCollection
                 'created_at' => $row->created_at,
                 'status_m' => $row->status,
             ];
-        })->all();
+        })->filter()->all(); // Filtrar los valores nulos
     }
 }

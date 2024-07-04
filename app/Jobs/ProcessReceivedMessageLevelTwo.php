@@ -108,7 +108,7 @@ class ProcessReceivedMessageLevelTwo implements ShouldQueue
     {
         $contactId = 53;
         $advisorId = 3; // Advisor para Oficina de Titulación
-        $welcomeMessage = "🌟 ¡Bienvenido a la Oficina de Titulación de Drasam CRM! 🌟\n\nEn la Oficina de Titulación, estamos aquí para ti, nuestra comunidad. 📜 Antes de comenzar, necesitamos tu número de DNI para brindarte la mejor asistencia posible. 📋\n\n¡Por favor, compártelo con nosotros para ayudarte a resolver tus consultas rápidamente! 🙌";
+        $welcomeMessage = "🌟 ¡Bienvenido a la Oficina de Titulación de Drasam CRM! 🌟\n\nEn la Oficina de Titulación, estamos aquí para ti, nuestra comunidad. 📜\n\nPor favor, envíanos tu consulta personalizada y te ayudaremos a resolverla rápidamente. 🙌";
         $this->processAssignment($user, $contactId, $advisorId, $responseMessage, $messageContent, $welcomeMessage);
     }
 

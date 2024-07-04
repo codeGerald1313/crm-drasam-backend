@@ -15,6 +15,8 @@ use App\Jobs\ProcessReceivedMessageOPEA;
 use App\Jobs\ProcessReceivedMessageRealInit;
 use App\Jobs\ProcessReceivedMessageSatisfaction;
 use App\Jobs\ProcessReceivedMessageWebhook;
+use App\Jobs\ProcessReceivedMessageWebhookTitulacion;
+use App\Jobs\ProcessReceivedMessageWebhookTitulacionResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -155,6 +157,36 @@ class ChatBootController extends Controller
 
         return response()->json(['message' => 'Selección procesada correctamente para Webhook.'], 200);
     }
+
+    public function guardarSeleccionWebhookTitulacion(Request $request)
+    {
+        $validatedData = $request->validate([
+            'message' => 'required|string'
+        ]);
+
+        Log::info('Datos validados:', ['validatedData' => $validatedData]);
+
+        // Dispatch the job with the validated data
+        ProcessReceivedMessageWebhookTitulacion::dispatch($validatedData);
+
+        return response()->json(['message' => 'Selección procesada correctamente para Webhook.'], 200);
+    }
+
+    
+    public function guardarSeleccionWebhookTitulacionResponse(Request $request)
+    {
+        $validatedData = $request->validate([
+            'message' => 'required|string'
+        ]);
+
+        Log::info('Datos validados:', ['validatedData' => $validatedData]);
+
+        // Dispatch the job with the validated data
+        ProcessReceivedMessageWebhookTitulacionResponse::dispatch($validatedData);
+
+        return response()->json(['message' => 'Selección procesada correctamente para Webhook.'], 200);
+    }
+
 
     public function guardarSeleccionWebhookLevelTwo(Request $request)
     {

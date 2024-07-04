@@ -159,6 +159,9 @@ Route::group(['prefix' => '/v1'], function () {
             // Webhooks
             Route::post('init', 'guardarSeleccionRealInit');
             Route::post('webhook', 'guardarSeleccionWebhook');
+            Route::post('webhook-titulacion', 'guardarSeleccionWebhookTitulacion');
+            Route::post('webhook-titulacion-response', 'guardarSeleccionWebhookTitulacionResponse');
+
             Route::post('webhook-level-2', 'guardarSeleccionWebhookLevelTwo');
             Route::post('webhook-encuesta', 'guardarSeleccionWebhookEncuesta');
 
